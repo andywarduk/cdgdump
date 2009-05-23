@@ -1,0 +1,93 @@
+#!/bin/bash
+
+#	 cdgdump - dump cdg file to SDL window / png
+#    Copyright (C) 2007 wardyang
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This assumes .cdg and .mp3 files are in the same directory
+
+while [ "x$1" != x ]; do
+	file=`basename "$1"`
+	file="${file%.*}"
+	dir=`dirname "$1"`
+	if [ ${dir:0:1} = . ]; then
+		# Relative directory
+		dir="`pwd`/$dir"
+	fi
+	shift
+
+	# Check files exist
+	if [ ! -f "$dir/$file.cdg" ]; then
+		echo File $file.cdg does not exist
+		exit 6
+	fi
+	if [ ! -f "$dir/$file.mp3" ]; then
+		echo File $file.mp3 does not exist
+		exit 6
+	fi	
+
+	# Recreate temp directory		
+	tempdir="$dir/$file.tmp"
+	if [ -d "$tempdir" ]; then
+		rm -rf "$tempdir"
+		if [ $? != 0 ]; then
+			echo Unable to remove old temporary directory $tempdir
+			exit 1;
+		fi
+	fi
+	mkdir "$tempdir";
+	if [ $? != 0 ]; then
+		echo Unable to create temporary directory $tempdir
+		exit 2;
+	fi
+
+	# Generate PNGs
+	echo Converting $file
+	cdgdump -p "$dir/$file.cdg" -o "$tempdir"
+	if [ $? != 0 ]; then
+		exit 3;
+	fi
+	
+	# Convert to divx
+	pushd "$tempdir" >/dev/null
+	if [ $? != 0 ]; then
+		exit 4;
+	fi
+	mencoder mf://@FrameList.txt -mf w=300:h=216:fps=25:type=png -o "$file.avi" -ovc xvid -xvidencopts par=pal43:bitrate=647 -audiofile "$dir/$file.mp3" -oac copy
+	res=$?
+	popd >/dev/null
+	if [ $res != 0 ]; then
+		exit 5;
+	fi
+	
+	# Move divx file
+	mv "$tempdir/$file.avi" "$dir/$file.avi"
+	if [ $res != 0 ]; then
+		exit 5;
+	fi
+
+	# Remove temp directory		
+	if [ -d "$tempdir" ]; then
+		rm -rf "$tempdir"
+		if [ $? != 0 ]; then
+			exit 1;
+		fi
+	fi
+done
+
+
+
+
+

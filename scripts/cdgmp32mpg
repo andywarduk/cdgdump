@@ -1,0 +1,92 @@
+#!/bin/bash
+
+#	 cdgdump - dump cdg file to SDL window / png
+#    Copyright (C) 2007 wardyang
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This assumes .cdg and .mp3 files are in the same directory
+
+while [ "x$1" != x ]; do
+	file=`basename "$1"`
+	file="${file%.*}"
+	dir=`dirname "$1"`
+	if [ ${dir:0:1} = . ]; then
+		# Relative directory
+		dir="`pwd`/$dir"
+	fi
+	shift
+
+	# Check files exist
+	if [ ! -f "$dir/$file.cdg" ]; then
+		echo File $file.cdg does not exist
+		exit 6
+	fi
+	if [ ! -f "$dir/$file.mp3" ]; then
+		echo File $file.mp3 does not exist
+		exit 6
+	fi	
+
+	# Recreate temp directory		
+	tempdir="$dir/$file.tmp"
+	if [ -d "$tempdir" ]; then
+		rm -rf "$tempdir"
+		if [ $? != 0 ]; then
+			exit 1;
+		fi
+	fi
+	mkdir "$tempdir";
+	if [ $? != 0 ]; then
+		exit 2;
+	fi
+
+	# Generate PNGs
+	echo Converting $file
+	cdgdump -p "$dir/$file.cdg" -o "$tempdir"
+	if [ $? != 0 ]; then
+		exit 3;
+	fi
+	
+	# Convert to DVD compatilbe mpg (PAL)
+	pushd "$tempdir" >/dev/null
+	if [ $? != 0 ]; then
+		exit 4;
+	fi
+	mencoder mf://@FrameList.txt -mf w=300:h=216:fps=25:type=png -audiofile "$dir/$file.mp3" -o "$file.mpg" -ovc lavc -oac lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:576,harddup -srate 48000 -af lavcresample=48000 -ofps 25 -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=15:vstrict=0:aspect=16/9:acodec=ac3:abitrate=384
+# NTSC	mencoder mf://@FrameList.txt -mf w=300:h=216:fps=25:type=png -audiofile "$dir/$file.mp3" -o "$file.mpg" -ovc lavc -oac lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=720:480,harddup -srate 48000 -af lavcresample=48000 -ofps 30000/1001 -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=15:vstrict=0:aspect=16/9:acodec=ac3:abitrate=384
+	res=$?
+	popd >/dev/null
+	if [ $res != 0 ]; then
+		exit 5;
+	fi
+	
+	# Move mpg file
+	mv "$tempdir/$file.mpg" "$dir/$file.mpg"
+	if [ $res != 0 ]; then
+		exit 5;
+	fi
+
+	# Remove temp directory		
+	if [ -d "$tempdir" ]; then
+		rm -rf "$tempdir"
+		if [ $? != 0 ]; then
+			exit 1;
+		fi
+	fi
+done
+
+
+
+
+
