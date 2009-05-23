@@ -75,7 +75,7 @@ int main(int ArgC,char **ArgV)
 	}
 	
 	if(!Ok || optind>=ArgC){
-		printf("Usage: CgdDump [-t] [-v] [-p] [-d] [-r] [-o dir] file [file...]\n"
+		printf("Usage: cgddump [-t] [-v] [-p] [-d] [-r] [-o dir] file [file...]\n"
 		       "   where: -t        Produce text output\n"
 		       "          -v        Produce video output\n"
 		       "          -p        Produce PNG output with frame list @ 25fps\n"
