@@ -1,0 +1,38 @@
+What is it?
+===========
+
+This program can be used to view CD+G files (.cdg) but it's real use is converting cdg file + audio to video. CD+G is most commonly used on karaoke CDs where graphical lyrics are stored in the CD subchannels R to W.
+
+
+Building
+========
+
+To build this you need the SDL, libpng and zlib development stuff. On my platform of choice (Fedora) this is a matter of doing:
+
+sudo yum -y install sdl-devel libpng-devel zlib-devel
+
+If you've checked this out from cvs then do the following first:
+
+make -f Makefile.cvs
+
+Now it's time to configure the build. To see available options do:
+
+./configure --help
+
+If you're happy with the defaults, just do:
+
+./configure
+
+If that succeeds:
+
+make
+sudo make install
+
+That should be it!
+
+
+Thanks
+======
+
+Thanks go to Jim Bumgardner for his document "CD+G Revealed: Playing back Karaoke tracks in Software" (http://www.jbum.com/cdg_revealed.html).
+
