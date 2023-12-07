@@ -1,5 +1,5 @@
 /*
-	cdgdump - dump cdg file to SDL window / png
+    cdgdump - dump cdg file to SDL window / png
     Copyright (C) 2007 wardyang
 
     This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 #include <png.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 
 #include "CDG.h"
 

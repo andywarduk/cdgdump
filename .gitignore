@@ -1,0 +1,15 @@
+Makefile.in
+aclocal.m4
+autom4te.cache/
+configure
+config.log
+config.status
+depcomp
+install-sh
+missing
+Makefile
+*.o
+*~
+src/.deps
+src/cdgdump
+
